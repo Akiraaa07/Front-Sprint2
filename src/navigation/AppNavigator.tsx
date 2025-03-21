@@ -7,6 +7,7 @@ import SintomasScreen from '../screens/SintomasScreen';
 import ListaSintomasScreen from '../screens/ListaSintomasScreen';
 import AdicionarFeedbackScreen from '../screens/AdicionarFeedbackScreen';
 import RegisterScreen from '../screens/RegisterScreen';
+import RecomendacoesScreen from '../screens/RecomendacoesScreen'; // Tela de recomendações odontológicas
 import { RootStackParamList } from './types';
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -51,6 +52,11 @@ const AppNavigator = () => {
         name="AdicionarFeedbackScreen"
         component={AdicionarFeedbackScreen}
         options={{ title: 'Novo Feedback' }}
+      />
+      <Stack.Screen
+        name="RecomendacoesScreen"
+        component={RecomendacoesScreen}
+        options={{ title: 'Recomendações Odontológicas' }}
       />
     </Stack.Navigator>
   );

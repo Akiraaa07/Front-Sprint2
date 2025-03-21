@@ -25,7 +25,6 @@ const HomeScreen: React.FC = () => {
 
   return (
     <Box flex={1} bg="#F5F5F5" safeArea>
-      {/* Barra Superior com botão de Logout */}
       <HStack justifyContent="space-between" alignItems="center" px={4} py={4} bg="white" shadow={1}>
         <Text fontSize="lg" fontWeight="bold" color="blue.600">
           Sistema Odontológico
@@ -42,11 +41,9 @@ const HomeScreen: React.FC = () => {
         </Button>
       </HStack>
 
-      {/* Conteúdo Principal com Scroll */}
       <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 16 }}>
         <Center>
           <VStack space={5} alignItems="center" width="100%">
-            {/* Seção de Feedbacks */}
             <Box bg="white" width="100%" borderRadius="lg" shadow={2} p={4}>
               <HStack alignItems="center" space={3}>
                 <Icon as={MaterialIcons} name="feedback" size="lg" color="blue.500" />
@@ -77,7 +74,6 @@ const HomeScreen: React.FC = () => {
               </Button>
             </Box>
 
-            {/* Seção de Sintomas */}
             <Box bg="white" width="100%" borderRadius="lg" shadow={2} p={4}>
               <HStack alignItems="center" space={3}>
                 <Icon as={MaterialIcons} name="healing" size="lg" color="blue.500" />
@@ -105,6 +101,26 @@ const HomeScreen: React.FC = () => {
                 mt={3}
               >
                 Ver Histórico de Sintomas
+              </Button>
+            </Box>
+
+            <Box bg="white" width="100%" borderRadius="lg" shadow={2} p={4}>
+              <HStack alignItems="center" space={3}>
+                <Icon as={MaterialIcons} name="medical-services" size="lg" color="blue.500" />
+                <Text fontSize="lg" fontWeight="bold" color="blue.700">
+                  Recomendações Odontológicas
+                </Text>
+              </HStack>
+              <Divider my={3} bg="gray.200" />
+              <Button
+                bg="blue.500"
+                _text={{ color: 'white', fontWeight: 'bold' }}
+                _pressed={{ bg: 'blue.600' }}
+                rounded="full"
+                onPress={() => navigation.navigate('RecomendacoesScreen')}
+                mt={2}
+              >
+                Ver Recomendações
               </Button>
             </Box>
           </VStack>

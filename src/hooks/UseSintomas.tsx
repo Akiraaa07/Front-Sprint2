@@ -8,37 +8,49 @@ interface Feedback {
   data: string;
 }
 
+interface Sintoma {
+  id: number;
+  descricao: string;
+  intensidade: string;
+  data_registro: string;
+  status: 'pendente' | 'aprovado' | 'reprovado';
+}
+
 interface ContextoEstadoGlobal {
   feedbacks: Feedback[];
+  sintomas: Sintoma[];
   carregarFeedbacks: () => void;
-  adicionarFeedback: (usuario: string, comentario: string) => Promise<void>;
-  editarFeedback: (id: number, novoComentario: string) => Promise<void>;
-  excluirFeedback: (id: number) => Promise<void>;
+  carregarSintomas: () => void;
+  adicionarSintoma: (descricao: string, intensidade: string) => Promise<void>;
+  editarSintoma: (id: number, descricao: string, intensidade: string) => Promise<void>;
+  excluirSintoma: (id: number) => Promise<void>;
   carregando: boolean;
 }
 
 const ContextoEstadoGlobal = createContext<ContextoEstadoGlobal>({
   feedbacks: [],
+  sintomas: [],
   carregarFeedbacks: () => {},
-  adicionarFeedback: async () => {},
-  editarFeedback: async () => {},
-  excluirFeedback: async () => {},
+  carregarSintomas: () => {},
+  adicionarSintoma: async () => {},
+  editarSintoma: async () => {},
+  excluirSintoma: async () => {},
   carregando: false,
 });
 
 export const useEstadoGlobal = () => useContext(ContextoEstadoGlobal);
 
 export const ProvedorEstadoGlobal: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+  const [sintomas, setSintomas] = useState<Sintoma[]>([]);
   const [carregando, setCarregando] = useState<boolean>(true);
 
-  const carregarFeedbacks = async () => {
+  const carregarSintomas = async () => {
     setCarregando(true);
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) throw new Error('Token não encontrado');
 
-      const response = await fetch('http://localhost:3000/api/feedbacks', {
+      const response = await fetch('http://localhost:3000/api/sintomas', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -47,11 +59,11 @@ export const ProvedorEstadoGlobal: React.FC<{ children: React.ReactNode }> = ({ 
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao buscar feedbacks');
+        throw new Error('Erro ao buscar sintomas');
       }
 
       const dados = await response.json();
-      setFeedbacks(dados);
+      setSintomas(dados);
     } catch (error) {
       console.error(error);
     } finally {
@@ -59,60 +71,64 @@ export const ProvedorEstadoGlobal: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const adicionarFeedback = async (usuario: string, comentario: string) => {
+  const adicionarSintoma = async (descricao: string, intensidade: string) => {
     const token = await AsyncStorage.getItem('token');
     if (!token) throw new Error('Token não encontrado');
 
     try {
-      const response = await fetch('http://localhost:3000/api/feedbacks', {
+      const response = await fetch('http://localhost:3000/api/sintomas', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ usuario, comentario }),
+        body: JSON.stringify({ descricao, intensidade }),
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao adicionar feedback');
+        throw new Error('Erro ao adicionar sintoma');
       }
 
-      await carregarFeedbacks(); // Atualiza a lista após adicionar feedback
+      const novoSintoma: Sintoma = await response.json();
+      setSintomas(prevSintomas => [...prevSintomas, novoSintoma]);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const editarFeedback = async (id: number, novoComentario: string) => {
+  const editarSintoma = async (id: number, descricao: string, intensidade: string) => {
     const token = await AsyncStorage.getItem('token');
     if (!token) throw new Error('Token não encontrado');
 
     try {
-      const response = await fetch(`http://localhost:3000/api/feedbacks/${id}`, {
+      const response = await fetch(`http://localhost:3000/api/sintomas/${id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ comentario: novoComentario }),
+        body: JSON.stringify({ descricao, intensidade }),
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao editar feedback');
+        throw new Error('Erro ao editar sintoma');
       }
 
-      await carregarFeedbacks(); // Atualiza a lista após editar feedback
+      const sintomaAtualizado = await response.json();
+      setSintomas(prevSintomas =>
+        prevSintomas.map(sintoma => (sintoma.id === id ? sintomaAtualizado : sintoma))
+      );
     } catch (error) {
       console.error(error);
     }
   };
 
-  const excluirFeedback = async (id: number) => {
+  const excluirSintoma = async (id: number) => {
     const token = await AsyncStorage.getItem('token');
     if (!token) throw new Error('Token não encontrado');
 
     try {
-      const response = await fetch(`http://localhost:3000/api/feedbacks/${id}`, {
+      const response = await fetch(`http://localhost:3000/api/sintomas/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -121,28 +137,26 @@ export const ProvedorEstadoGlobal: React.FC<{ children: React.ReactNode }> = ({ 
       });
 
       if (!response.ok) {
-        throw new Error('Erro ao excluir feedback');
+        throw new Error('Erro ao excluir sintoma');
       }
 
-      await carregarFeedbacks(); // Atualiza a lista após excluir feedback
+      setSintomas(prevSintomas => prevSintomas.filter(sintoma => sintoma.id !== id));
     } catch (error) {
       console.error(error);
     }
   };
 
-  useEffect(() => {
-    carregarFeedbacks(); // Garante que os feedbacks sejam carregados na inicialização
-  }, []);
-
   return (
     <ContextoEstadoGlobal.Provider
       value={{
-        feedbacks,
-        carregarFeedbacks,
-        adicionarFeedback,
-        editarFeedback,
-        excluirFeedback,
+        sintomas,
+        carregarSintomas,
+        adicionarSintoma,
+        editarSintoma,
+        excluirSintoma,
         carregando,
+        feedbacks: [], // Pode expandir aqui também se quiser integrar ambos
+        carregarFeedbacks: () => {},
       }}
     >
       {children}
